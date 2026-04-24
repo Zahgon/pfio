@@ -33,7 +33,7 @@ class _ConnectionPool(object):
 
     @property
     def is_forked(self):
-        return self.pid != os.getpid()
+        pass
 
     @contextlib.contextmanager
     def get(self, host: str) -> \
@@ -64,10 +64,7 @@ CONNECTION_POOL: Optional[_ConnectionPool] = None
 
 
 def _get_connection_pool(timeout: int) -> _ConnectionPool:
-    global CONNECTION_POOL
-    if CONNECTION_POOL is None:
-        CONNECTION_POOL = _ConnectionPool(timeout)
-    return CONNECTION_POOL
+    pass
 
 
 class HTTPConnector(object):
@@ -238,11 +235,11 @@ class HTTPCache(Cache):
 
     @property
     def multiprocess_safe(self):
-        return True
+        pass
 
     @property
     def multithread_safe(self):
-        return True
+        pass
 
     def put(self, i: int, data: Any):
         with record("pfio.cache.http:put", trace=self.trace):

@@ -49,11 +49,7 @@ class Cache(abc.ABC):
         from backend callable with the result stored in cache.
 
         '''
-        data = self.get(i)
-        if data is None:
-            data = backend_get(i)
-            self.put(i, data)
-        return data
+        pass
 
 
 from pfio.cache.file_cache import FileCache  # NOQA

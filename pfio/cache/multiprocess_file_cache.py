@@ -206,11 +206,11 @@ class MultiprocessFileCache(cache.Cache):
 
     @property
     def multiprocess_safe(self) -> bool:
-        return True
+        pass
 
     @property
     def multithread_safe(self) -> bool:
-        return True
+        pass
 
     def get(self, i):
         with record("pfio.cache.multiprocessfile:get", trace=self.trace):
@@ -354,32 +354,7 @@ class MultiprocessFileCache(cache.Cache):
         .. note:: This feature is experimental.
 
         '''
-        if self._frozen:
-            if self.verbose:
-                print("Failed to preload the cache from {}: "
-                      "The cache is already frozen."
-                      .format(name))
-            return False
-
-        if self._master_pid != os.getpid():
-            raise RuntimeError("Cannot preload a cache in a worker process")
-
-        # Overwrite the current cache by the specified cache file.
-        # This is needed to prevent the specified cache file are deleted when
-        # the cache object is destroyed.
-        ld_cache_file = os.path.join(self.dir, name)
-        if not os.path.exists(ld_cache_file):
-            if self.verbose:
-                print('Failed to ploread the cache from {}: '
-                      'The specified cache not found in {}'
-                      .format(name, self.dir))
-            return False
-
-        self.cache_file.close()
-        self.cache_fd = None
-        self.cache_file = _DummyTemporaryFile(ld_cache_file)
-        self._frozen = True
-        return True
+        pass
 
     def preserve(self, name, overwrite=False):
         '''Preserve the cache as a persistent file on the disk
@@ -414,31 +389,4 @@ class MultiprocessFileCache(cache.Cache):
         .. note:: This feature is experimental.
 
         '''
-
-        if self._master_pid != os.getpid():
-            raise RuntimeError("Cannot preserve a cache in a worker process")
-
-        cache_file = os.path.join(self.dir, name)
-        if overwrite:
-            if os.path.exists(cache_file):
-                os.unlink(cache_file)
-        elif os.path.exists(cache_file):
-            if self.verbose:
-                print('Specified cache named "{}" already exists in {}'
-                      .format(name, self.dir))
-            return False
-
-        self._open_fds()
-        try:
-            fcntl.flock(self.cache_fd, fcntl.LOCK_EX)
-            os.link(self.cache_file.name, cache_file)
-
-        except OSError as ose:
-            # Lock acquisition error -> No problem, since other worker
-            # should be already working on it
-            if ose.errno not in (errno.EACCES, errno.EAGAIN):
-                raise
-        finally:
-            fcntl.flock(self.cache_fd, fcntl.LOCK_UN)
-
-        return True
+        pass

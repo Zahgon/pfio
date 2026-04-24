@@ -33,8 +33,7 @@ class S3ProfileIOWrapper:
         attr = getattr(self.obj, name)
         if callable(attr):
             def wrapper(*args, **kwargs):
-                with record(f"pfio.v2.S3:{attr.__name__}", trace=True):
-                    return attr(*args, **kwargs)
+                pass
             return wrapper
         else:
             return attr
@@ -48,8 +47,7 @@ class Boto3ProfileWrapper:
         attr = getattr(self.obj, name)
         if callable(attr):
             def wrapper(*args, **kwargs):
-                with record(f"pfio.boto3:{attr.__name__}", trace=True):
-                    return attr(*args, **kwargs)
+                pass
             return wrapper
         else:
             return attr
@@ -149,52 +147,37 @@ class _ObjectReader(io.RawIOBase):
 
     @property
     def closed(self):
-        return self._closed
+        pass
 
     def isatty(self):
-        return False
+        pass
 
     def readable(self):
-        return True
+        pass
 
     def seekable(self):
-        return True
+        pass
 
     def tell(self):
-        return self.pos
+        pass
 
     def truncate(self, size=None):
         raise io.UnsupportedOperation('truncate')
 
     def seek(self, pos, whence=io.SEEK_SET):
-        if whence in [0, io.SEEK_SET]:
-            if pos < 0:
-                raise OSError(22, "[Errno 22] Invalid argument")
-        elif whence in [1, io.SEEK_CUR]:
-            pos += self.pos
-        elif whence in [2, io.SEEK_END]:
-            pos += self.content_length
-        else:
-            raise ValueError('Wrong whence value: {}'.format(whence))
-
-        if pos < 0:
-            raise OSError(22, "[Errno 22] Invalid argument")
-        self.pos = pos
-        return self.pos
+        pass
 
     def writable(self):
-        return False
+        pass
 
     def write(self, data):
         raise io.UnsupportedOperation('not writable')
 
     def readall(self):
-        return self.read(-1)
+        pass
 
     def readinto(self, b):
-        buf = self.read(len(b))
-        b[:len(buf)] = buf
-        return len(buf)
+        pass
 
 
 class _ObjectWriter:
@@ -313,19 +296,19 @@ class _ObjectWriter:
 
     @property
     def closed(self):
-        return self.buf is None
+        pass
 
     def isatty(self):
-        return False
+        pass
 
     def readable(self):
-        return False
+        pass
 
     def seekable(self):
-        return False
+        pass
 
     def writable(self):
-        return True
+        pass
 
 
 class S3(FS):
@@ -479,52 +462,7 @@ class S3(FS):
 
             mode (str): open mode
         '''
-        with record("pfio.v2.S3:open", trace=self.trace):
-            self._checkfork()
-            if 'a' in mode:
-                raise io.UnsupportedOperation('Append is not supported')
-            if 'r' in mode and 'w' in mode:
-                raise io.UnsupportedOperation(
-                    'Read-write mode is not supported'
-                )
-
-            path = os.path.join(self.cwd, path)
-            path = _normalize_key(path)
-            if 'r' in mode:
-                obj = _ObjectReader(self.client, self.bucket,
-                                    path, mode, kwargs)
-
-                bs = self.buffering
-                if bs < 0:
-                    bs = min(obj.content_length, DEFAULT_MAX_BUFFER_SIZE)
-
-                if 'b' in mode:
-                    if self.buffering and bs != 0:
-                        obj = io.BufferedReader(obj, buffer_size=bs)
-                else:
-                    obj = io.TextIOWrapper(obj)
-                    if self.buffering:
-                        # This is undocumented property; but resident at
-                        # least since 2009 (the merge of io-c branch).
-                        # We'll use it until the day of removal.
-                        if bs == 0:
-                            # empty file case: _CHUNK_SIZE must be positive
-                            bs = DEFAULT_MAX_BUFFER_SIZE
-                        obj._CHUNK_SIZE = bs
-
-            elif 'w' in mode:
-                obj = _ObjectWriter(self.client, self.bucket, path, mode,
-                                    self.mpu_chunksize, kwargs)
-                if 'b' in mode:
-                    obj = io.BufferedWriter(obj)
-
-            else:
-                raise RuntimeError(f'Unknown option: {mode}')
-
-            if self.trace:
-                return S3ProfileIOWrapper(obj)
-            else:
-                return obj
+        pass
 
     def list(self, prefix: Optional[str] = "", recursive=False, detail=False):
         '''List all objects (and prefixes)
@@ -533,44 +471,10 @@ class S3(FS):
         common prefixes shows up like directories.
 
         '''
-        for e in record_iterable("pfio.v2.S3:list",
-                                 self._list(prefix, recursive, detail),
-                                 trace=self.trace):
-            yield e
+        pass
 
     def _list(self, prefix: Optional[str] = "", recursive=False, detail=False):
-        self._checkfork()
-        key = os.path.join(self.cwd, "" if prefix is None else prefix)
-        key = _normalize_key(key)
-        if key == '.':
-            key = ''
-        elif key != '' and not key.endswith('/'):
-            key += '/'
-        if '/../' in key or key.startswith('..'):
-            raise ValueError('Invalid S3 key: {} as {}'.format(prefix, key))
-
-        page_size = 1000
-        paginator = self.client.get_paginator('list_objects_v2')
-        paging_args = {
-            'Bucket': self.bucket, 'Prefix': key,
-            'PaginationConfig': {'PageSize': page_size}
-        }
-        if not recursive:
-            paging_args['Delimiter'] = '/'
-
-        iterator = paginator.paginate(**paging_args)
-        for res in iterator:
-            # print(res)
-            for common_prefix in res.get('CommonPrefixes', []):
-                if detail:
-                    yield S3PrefixStat(common_prefix['Prefix'][len(key):])
-                else:
-                    yield common_prefix['Prefix'][len(key):]
-            for content in res.get('Contents', []):
-                if detail:
-                    yield S3ObjectStat(content['Key'][len(key):], content)
-                else:
-                    yield content['Key'][len(key):]
+        pass
 
     def stat(self, path):
         '''Imitate FileStat with S3 Object metadata
@@ -710,7 +614,4 @@ class S3(FS):
                                              Key=key)
 
     def _canonical_name(self, file_path: str) -> str:
-        path = os.path.join(self.cwd, file_path)
-        norm_path = _normalize_key(path)
-
-        return f"s3://{self.hostname}/{self.bucket}/{norm_path}"
+        pass

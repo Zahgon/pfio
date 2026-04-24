@@ -25,11 +25,11 @@ class NaiveCache(Cache):
 
     @property
     def multiprocess_safe(self):
-        return False
+        pass
 
     @property
     def multithread_safe(self):
-        return self._multithread_safe
+        pass
 
     def put(self, i, data):
         with self.lock:

@@ -269,71 +269,27 @@ class Hdfs(FS):
 
     def _get_principal_name(self):
         # get the default principal name from `klist` cache
-        principal_name = _get_principal_name_from_klist()
-
-        if principal_name is not None:
-            return principal_name
-
-        # try getting principal name from keytab
-        principal_name = _get_principal_name_from_keytab()
-        if principal_name is not None:
-            return principal_name
-
-        # in case every thing, use the login username instead
-        return self._get_login_username()
+        pass
 
     def _get_login_username(self):
-        return getpass.getuser()
+        pass
 
     def open(self, file_path, mode='rb',
              buffering=-1, encoding=None, errors=None,
              newline=None, closefd=True, opener=None):
-        self._checkfork()
-        path = os.path.join(self.cwd, file_path)
-
-        try:
-            if 'r' in mode:
-                file_obj = self._fs.open_input_file(path)
-            else:
-                file_obj = self._fs.open_output_stream(path)
-        except pyarrow.lib.ArrowIOError as e:
-            raise IOError("open file error :{}".format(str(e)))
-
-        return self._wrap_file_obj(file_obj, mode, encoding, errors, newline)
+        pass
 
     def _wrap_file_obj(self, file_obj, mode, encoding, errors, newline):
-        if 'b' not in mode:
-            return io.TextIOWrapper(file_obj, encoding, errors, newline)
-        elif 'r' in mode:
-            # Wrap file_obj with io.BufferedReader for ``peek()``, to
-            # significiantly improve unpickle performance.
-            return io.BufferedReader(file_obj)
-        elif 'w' in mode:
-            return io.BufferedWriter(file_obj)
-        else:
-            raise ValueError("invalid option")
+        pass
 
     def subfs(self, rel_path):
-        return Hdfs(os.path.join(self.cwd, rel_path))
+        pass
 
     def close(self):
         pass
 
     def list(self, path: Optional[str] = "", recursive=False, detail=False):
-        self._checkfork()
-
-        if not self.isdir(path):
-            raise NotADirectoryError(path)
-
-        path = os.path.join(self.cwd, "" if path is None else path)
-        norm_path = self._fs.normalize_path(path).rstrip('/')
-
-        infos = self._fs.get_file_info(FileSelector(path, recursive=recursive))
-        for file_info in infos:
-            if detail:
-                yield HdfsFileStat(file_info)
-            else:
-                yield file_info.path[len(norm_path)+1:]
+        pass
 
     def stat(self, path):
         self._checkfork()

@@ -66,19 +66,13 @@ class HTTPCachedFS(FS):
              file_path: str,
              mode: str = 'rb',
              *args, **kwargs) -> io.IOBase:
-        with record("pfio.v2.http_cache:open", trace=self.trace):
-            if 'r' in mode:
-                kwargs['mode'] = mode
-                return _HTTPCacheIOBase(file_path, self.conn, self.fs,
-                                        self.max_cache_size, args, kwargs)
-            else:
-                return self.fs.open(file_path, mode, *args, **kwargs)
+        pass
 
     def _reset(self):
         self.fs._reset()
 
     def list(self, *args, **kwargs) -> Iterator[Union[FileStat, str]]:
-        return self.fs.list(*args, **kwargs)
+        pass
 
     def stat(self, *args, **kwargs) -> FileStat:
         return self.fs.stat(*args, **kwargs)
@@ -106,7 +100,7 @@ class HTTPCachedFS(FS):
 
     def _canonical_name(self, file_path: str) -> str:
         # Don't add httpcache in normpath
-        return self.fs._canonical_name(file_path)
+        pass
 
 
 class _HTTPCacheIOBase(io.RawIOBase):
@@ -218,63 +212,34 @@ class _HTTPCacheIOBase(io.RawIOBase):
 
     @property
     def closed(self):
-        return self._closed
+        pass
 
     def isatty(self):
-        return False
+        pass
 
     def readable(self):
-        return True
+        pass
 
     def seekable(self):
-        return True
+        pass
 
     def tell(self):
-        with record("pfio.v2.http_cache:tell", trace=self.trace):
-            self._load_file()
-
-            if self.pos is not None:
-                return self.pos
-            else:
-                assert self.fp is not None
-                return self.fp.tell()
+        pass
 
     def truncate(self, size=None):
         raise io.UnsupportedOperation('truncate')
 
     def seek(self, pos, whence=io.SEEK_SET):
-        with record("pfio.v2.http_cache:seek", trace=self.trace):
-            self._load_file()
-
-            if self.pos is not None:
-                if whence in [0, io.SEEK_SET]:
-                    pass
-                elif whence in [1, io.SEEK_CUR]:
-                    pos += self.pos
-                elif whence in [2, io.SEEK_END]:
-                    pos += len(self.whole_file)
-                else:
-                    raise ValueError('Wrong whence value: {}'.format(whence))
-
-                if pos < 0:
-                    raise OSError(22, "[Errno 22] Invalid argument")
-
-                self.pos = pos
-                return self.pos
-            else:
-                assert self.fp is not None
-                return self.fp.seek(pos, whence)
+        pass
 
     def writable(self):
-        return False
+        pass
 
     def write(self, data):
         raise io.UnsupportedOperation('not writable')
 
     def readall(self):
-        return self.read(-1)
+        pass
 
     def readinto(self, b):
-        buf = self.read(len(b))
-        b[:len(buf)] = buf
-        return len(buf)
+        pass

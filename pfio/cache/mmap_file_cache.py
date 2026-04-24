@@ -50,15 +50,15 @@ class ReadOnlyFileCache(cache.Cache):
 
     @property
     def frozen(self):
-        return True
+        pass
 
     @property
     def multiprocess_safe(self):
-        return True
+        pass
 
     @property
     def multithread_safe(self):
-        return True
+        pass
 
     def get(self, i):
         if self.closed:
@@ -109,25 +109,7 @@ class ReadOnlyFileCache(cache.Cache):
         .. note:: This feature is experimental.
 
         '''
-        filename = os.path.join(self.dir, name)
-        self.fp = open(filename, 'rb')
-
-        self.offset_list = []
-        for i in range(self.length):
-            offset = self.buflen * i
-            buf = os.pread(self.fp.fileno(), self.buflen, offset)
-            (o, l) = unpack('Qq', buf)
-            if l < 0 or o < 0:
-                raise RuntimeError("Incomplete cache file")
-
-            self.offset_list.append((o, l))
-
-        assert self.length == len(self.offset_list)
-
-        # mmaped region
-        self.mreg = mmap.mmap(self.fp.fileno(), 0, prot=mmap.PROT_READ)
-        self.closed = False
-        return True
+        pass
 
     def preserve(self, name, overwrite=False):
         raise io.UnsupportedOperation('read only')

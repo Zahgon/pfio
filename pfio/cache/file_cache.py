@@ -68,13 +68,7 @@ class RWLock:
             return LockContext(self)
 
     def unlock(self):
-        with self.cv:
-            thread_id = threading.get_ident()
-            if self.writer == thread_id:
-                self.writer = None
-            else:
-                self.reader.remove(thread_id)
-            self.cv.notify_all()
+        pass
 
 
 class DummyLock:
@@ -206,16 +200,16 @@ class FileCache(cache.Cache):
 
     @property
     def frozen(self):
-        return self._frozen
+        pass
 
     @property
     def multiprocess_safe(self):
         # If it's preseved/preloaded, then the file contents are fixed.
-        return self._frozen
+        pass
 
     @property
     def multithread_safe(self):
-        return self._multithread_safe
+        pass
 
     def get(self, i):
         with record("pfio.cache.file:get", trace=self.trace):
@@ -350,27 +344,7 @@ class FileCache(cache.Cache):
         .. note:: This feature is experimental.
 
         '''
-        if self._frozen:
-            if self.verbose:
-                print("Failed to preload the cache from {}: "
-                      "The cache is already frozen."
-                      .format(name))
-            return False
-
-        cachefile = os.path.join(self.dir, name)
-
-        if not os.path.exists(cachefile):
-            if self.verbose:
-                print('Failed to ploread the cache from {}: '
-                      'The specified cache not found in {}'
-                      .format(name, self.dir))
-            return False
-
-        with self.lock.wrlock():
-            self.cachefp.close()
-            self.cachefp = open(cachefile, 'rb')
-            self._frozen = True
-        return True
+        pass
 
     def preserve(self, name, overwrite=False):
         '''Preserve the cache as a persistent file on the disk
@@ -402,23 +376,4 @@ class FileCache(cache.Cache):
         .. note:: This feature is experimental.
 
         '''
-
-        cachefile = os.path.join(self.dir, name)
-
-        if overwrite:
-            if os.path.exists(cachefile):
-                os.unlink(cachefile)
-        elif os.path.exists(cachefile):
-            if self.verbose:
-                print('Specified cache named "{}" already exists in {}'
-                      .format(name, self.dir))
-            return False
-
-        with self.lock.wrlock():
-            # Hard link and save them
-            os.link(self.cachefp.name, cachefile)
-            self.cachefp.close()
-
-            self.cachefp = open(cachefile, 'rb')
-            self._frozen = True
-        return True
+        pass

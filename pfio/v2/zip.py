@@ -29,8 +29,7 @@ class ZipProfileIOWrapper:
         attr = getattr(self.fp, name)
         if callable(attr):
             def wrapper(*args, **kwargs):
-                with record(f"pfio.v2.Zip:{attr.__name__}", trace=True):
-                    return attr(*args, **kwargs)
+                pass
             return wrapper
         else:
             return attr
@@ -137,19 +136,7 @@ class Zip(FS):
     def open(self, file_path, mode='r',
              buffering=-1, encoding=None, errors=None,
              newline=None, closefd=True, opener=None):
-        with record("pfio.v2.Zip:open", trace=self.trace):
-            self._checkfork()
-
-            file_path = os.path.join(self.cwd, os.path.normpath(file_path))
-            fp = self.zipobj.open(file_path, mode.replace('b', ''))
-
-            if 'b' not in mode:
-                fp = io.TextIOWrapper(fp, encoding, errors, newline)
-
-            if self.trace:
-                return ZipProfileIOWrapper(fp)
-            else:
-                return fp
+        pass
 
     def subfs(self, path):
         # TODO
@@ -181,75 +168,11 @@ class Zip(FS):
 
     def list(self, path_or_prefix: Optional[str] = "", recursive=False,
              detail=False):
-        for e in record_iterable("pfio.v2.Zip:list",
-                                 self._list(path_or_prefix,
-                                            recursive,
-                                            detail),
-                                 trace=self.trace):
-            yield e
+        pass
 
     def _list(self, path_or_prefix: Optional[str] = "", recursive=False,
               detail=False):
-        self._checkfork()
-
-        if path_or_prefix:
-            path_or_prefix = os.path.join(self.cwd,
-                                          os.path.normpath(path_or_prefix))
-            # cannot move beyond root
-            given_dir_list = path_or_prefix.split('/')
-            if ("." in given_dir_list or ".." in given_dir_list
-                    or {""} == set(given_dir_list)):
-                given_dir_list = []
-                path_or_prefix = ""
-        else:
-            given_dir_list = []
-
-        if path_or_prefix:
-            if self.exists(path_or_prefix) and not self.isdir(path_or_prefix):
-                raise NotADirectoryError(
-                    "{} is not a directory".format(path_or_prefix))
-            elif not any(name.startswith(path_or_prefix + "/")
-                         for name in self._names()):
-                # check if directories are NOT included in the zip
-                # such kind of zip can be made with "zip -D"
-                raise FileNotFoundError(
-                    "{} is not found".format(path_or_prefix))
-
-        if recursive:
-            for info in self.zipobj.infolist():
-                name = info.filename
-                assert path_or_prefix is not None
-                if name.startswith(path_or_prefix):
-                    name = name[len(path_or_prefix):].strip("/")
-                    if name:
-                        if detail:
-                            yield ZipFileStat(info)
-                        else:
-                            yield name
-        else:
-            _list = set()
-            for info in self.zipobj.infolist():
-                name = info.filename
-                return_file_name = None
-                current_dir_list = os.path.normpath(name).split('/')
-                if not given_dir_list:
-                    # if path_or_prefix is not given
-                    return_file_name = current_dir_list[0]
-                else:
-                    if (current_dir_list
-                            and len(current_dir_list) > len(given_dir_list)
-                            and current_dir_list[:len(given_dir_list)] ==
-                            given_dir_list):
-                        return_file_name = current_dir_list[
-                            len(given_dir_list):][0]
-
-                if (return_file_name is not None
-                        and return_file_name not in _list):
-                    _list.add(return_file_name)
-                    if detail:
-                        yield ZipFileStat(info)
-                    else:
-                        yield return_file_name
+        pass
 
     def isdir(self, file_path: str):
         with record("pfio.v2.Zip:isdir", trace=self.trace):
@@ -287,12 +210,7 @@ class Zip(FS):
         raise io.UnsupportedOperation
 
     def _canonical_name(self, file_path: str) -> str:
-        canonical_name = self.backend._canonical_name(self.file_path)
-        file_path = os.path.join(self.cwd, os.path.normpath(file_path))
-
-        # Use pfio-zipfs as reserved name to represent PFIO's Zip.
-        # If someone use `pfio-zipfs` in file_path, this might be broken.
-        return f"{canonical_name}/pfio-zipfs/{file_path}"
+        pass
 
     def _names(self) -> Set[str]:
         if self.name_cache is not None:

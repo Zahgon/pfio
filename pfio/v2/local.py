@@ -25,8 +25,7 @@ class LocalProfileIOWrapper:
         attr = getattr(self.fp, name)
         if callable(attr):
             def wrapper(*args, **kwargs):
-                with record(f"pfio.v2.Local:{attr.__name__}", trace=True):
-                    return attr(*args, **kwargs)
+                pass
             return wrapper
         else:
             return attr
@@ -90,14 +89,11 @@ class Local(FS):
 
     @property
     def cwd(self):
-        if self._cwd:
-            return self._cwd
-
-        return os.getcwd()
+        pass
 
     @cwd.setter
     def cwd(self, value: str):
-        self._cwd = value
+        pass
 
     def _reset(self):
         pass
@@ -114,61 +110,19 @@ class Local(FS):
              buffering=-1, encoding=None, errors=None,
              newline=None, closefd=True, opener=None):
 
-        with record("pfio.v2.Local:open", trace=self.trace):
-            path = os.path.join(self.cwd, file_path)
-
-            fp = io.open(path, mode,
-                         buffering, encoding, errors,
-                         newline, closefd, opener)
-
-            # Add ppe recorder to io class methods (e.g. read, write)
-            if self.trace:
-                return LocalProfileIOWrapper(fp)
-            else:
-                return fp
+        pass
 
     def list(self, path: Optional[str] = '', recursive=False,
              detail=False):
-        for e in record_iterable("pfio.v2.Local:list",
-                                 self._list(path, recursive, detail),
-                                 trace=self.trace):
-            yield e
+        pass
 
     def _list(self, path: Optional[str] = '', recursive=False,
               detail=False):
-        path_or_prefix = os.path.join(self.cwd,
-                                      "" if path is None else path)
-
-        if recursive:
-            path_or_prefix = path_or_prefix.rstrip("/")
-            # plus 1 to include the trailing slash
-            prefix_end_index = len(path_or_prefix) + 1
-            yield from self._recursive_list(prefix_end_index,
-                                            path_or_prefix, detail)
-        else:
-            for e in os.scandir(path_or_prefix):
-                # ls -F
-                if detail:
-                    yield LocalFileStat(e.stat(), e.name)
-                elif e.is_dir():
-                    yield e.name + '/'
-                else:
-                    yield e.name
+        pass
 
     def _recursive_list(self, prefix_end_index: int, path: str,
                         detail: bool):
-        for e in os.scandir(path):
-            # ls -F
-            if detail:
-                yield LocalFileStat(e.stat(), e.name)
-            elif e.is_dir():
-                yield e.path[prefix_end_index:] + '/'
-            else:
-                yield e.path[prefix_end_index:]
-
-            if e.is_dir():
-                yield from self._recursive_list(prefix_end_index,
-                                                e.path, detail)
+        pass
 
     def stat(self, path):
         with record("pfio.v2.Local:stat", trace=self.trace):
@@ -217,4 +171,4 @@ class Local(FS):
                 for item in pathlib.Path(self.cwd).glob(pattern)]
 
     def _canonical_name(self, file_path: str) -> str:
-        return "file:/" + os.path.normpath(os.path.join(self.cwd, file_path))
+        pass

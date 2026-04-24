@@ -53,26 +53,7 @@ def _removeprefix(text: str, prefix: str) -> str:
 
 
 def _compare_fs(lhs: FS, rhs: FS) -> bool:
-    if type(lhs) is type(rhs):
-        assert isinstance(lhs.cwd, str)
-        assert isinstance(rhs.cwd, str)
-
-        if isinstance(lhs, Local) and isinstance(rhs, Local):
-            return lhs.cwd == rhs.cwd
-        elif isinstance(lhs, S3) and isinstance(rhs, S3):
-            return (
-                lhs.cwd == rhs.cwd
-                and lhs.bucket == rhs.bucket
-                and lhs.endpoint == rhs.endpoint
-            )
-        elif isinstance(lhs, Hdfs) and isinstance(rhs, Hdfs):
-            return lhs.cwd == rhs.cwd and lhs.username == rhs.username
-        elif isinstance(lhs, Zip) and isinstance(rhs, Zip):
-            return lhs.cwd == rhs.cwd
-        else:
-            raise ValueError(f"unsupported FS: {lhs} and {rhs}")
-
-    return False
+    pass
 
 
 def _not_supported(name: Optional[str] = None) -> NotImplementedError:
@@ -137,11 +118,11 @@ class PurePath(PathLike):
 
     @property
     def sep(self) -> str:
-        return "/"
+        pass
 
     @property
     def scheme(self) -> str:
-        return self._scheme
+        pass
 
     def __hash__(self) -> int:
         return self._hash
@@ -190,48 +171,44 @@ class PurePath(PathLike):
 
     @property
     def parts(self) -> Tuple[str, ...]:
-        return self._pure.parts
+        pass
 
     @property
     def drive(self) -> str:
-        return self._pure.drive
+        pass
 
     @property
     def root(self) -> str:
-        return self._pure.root
+        pass
 
     @property
     def anchor(self) -> str:
-        return self._pure.anchor
+        pass
 
     @property
     def parents(self: SelfPurePathType) -> Sequence[SelfPurePathType]:
         # FIXME: reduce costs
-        p = self.parts
-        paths = [self.with_segments(*p[:-i]) for i in range(1, len(p) + 1)]
-        if self.is_absolute():
-            paths.pop(-1)
-        return paths
+        pass
 
     @property
     def parent(self: SelfPurePathType) -> SelfPurePathType:
-        return self.with_segments(self._pure.parent)
+        pass
 
     @property
     def name(self) -> str:
-        return self._pure.name
+        pass
 
     @property
     def suffix(self) -> str:
-        return self._pure.suffix
+        pass
 
     @property
     def suffixes(self) -> List[str]:
-        return self._pure.suffixes
+        pass
 
     @property
     def stem(self) -> str:
-        return self._pure.stem
+        pass
 
     # ---------------------------------------
     # pathlib.PurePath compatible methods
@@ -271,15 +248,10 @@ class PurePath(PathLike):
         return self._pure.is_absolute()
 
     def is_relative_to(self, *other: Union[str, PathLike]) -> bool:
-        if python_version_info.minor < 9:
-            raise NotImplementedError(
-                "`is_relative_to()` supports python 3.9 or higher"
-            )
-        else:
-            return self._pure.is_relative_to(*other)  # type: ignore
+        pass
 
     def is_reserved(self) -> bool:
-        return self._pure.is_reserved()
+        pass
 
     def joinpath(
         self: SelfPurePathType,
@@ -320,20 +292,13 @@ class PurePath(PathLike):
         return self.with_segments(rel)
 
     def with_name(self: SelfPurePathType, name: str) -> SelfPurePathType:
-        return self.with_segments(self._pure.with_name(name))
+        pass
 
     def with_stem(self: SelfPurePathType, stem: str) -> SelfPurePathType:
-        if python_version_info.minor < 9:
-            raise NotImplementedError(
-                "`with_stem()` supports python 3.9 or higher"
-            )
-        else:
-            return self.with_segments(
-                self._pure.with_stem(stem)  # type: ignore
-            )
+        pass
 
     def with_suffix(self: SelfPurePathType, suffix: str) -> SelfPurePathType:
-        return self.with_segments(self._pure.with_suffix(suffix))
+        pass
 
     def with_segments(
         self: SelfPurePathType,
@@ -464,7 +429,7 @@ class Path(PurePath):
         return self._fs.exists(p) and not self._fs.isdir(p)
 
     def is_junction(self) -> bool:
-        return False  # only Windows supports junctions
+        pass
 
     def is_mount(self) -> bool:
         raise _not_supported()
@@ -485,12 +450,7 @@ class Path(PurePath):
         raise _not_supported()
 
     def iterdir(self: SelfPathType) -> Iterator[SelfPathType]:
-        if self.is_dir():
-            for entry in self._fs.list(self._as_relative_to_fs()):
-                assert isinstance(entry, str)
-                yield self.with_segments(*self.parts, entry)
-        else:
-            raise NotADirectoryError(f"'{self.as_posix()}' is not a directory")
+        pass
 
     def walk(
         self,
@@ -534,29 +494,20 @@ class Path(PurePath):
     ) -> IOBase:
         # NOTE: first argument is `file_path`` in `Local`,
         #       but `S3` is `path`.
-        return self._fs.open(  # type: ignore
-            self._as_relative_to_fs(),
-            mode=mode,
-            buffering=buffering,
-            encoding=encoding,
-            errors=errors,
-            newline=newline,
-        )
+        pass
 
     def owner(self) -> str:
         raise _not_supported()
 
     def read_bytes(self) -> bytes:
-        with self.open(mode="rb", buffering=0) as f:
-            return f.read()  # type: ignore
+        pass
 
     def read_text(
         self,
         encoding: Optional[str] = None,
         errors: Optional[str] = None,
     ) -> str:
-        with self.open(mode="rt", encoding=encoding, errors=errors) as f:
-            return f.read()  # type: ignore
+        pass
 
     def readlink(self: SelfPathType) -> SelfPathType:
         raise _not_supported()
@@ -635,11 +586,7 @@ class Path(PurePath):
         raise _not_supported()
 
     def touch(self, mode: int = 0o666, exist_ok: bool = True) -> None:
-        if self.exists() and not exist_ok:
-            raise FileExistsError(f"'{self.as_posix()}' exists")
-
-        with self.open("wb") as f:
-            f.write(b"")
+        pass
 
     def unlink(self, missing_ok: bool = False) -> None:
         if self.is_dir():
@@ -650,8 +597,7 @@ class Path(PurePath):
             raise FileNotFoundError(f"'{self.as_posix()}' is not a file")
 
     def write_bytes(self, data: bytes) -> int:
-        with self.open(mode="wb") as f:
-            return f.write(data)  # type: ignore
+        pass
 
     def write_text(
         self,
@@ -660,13 +606,7 @@ class Path(PurePath):
         errors: Optional[str] = None,
         newline: Optional[str] = None,
     ) -> int:
-        with self.open(
-            mode="wt",
-            encoding=encoding,
-            errors=errors,
-            newline=newline,
-        ) as f:
-            return f.write(data)  # type: ignore
+        pass
 
 
 def copy(

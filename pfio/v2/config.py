@@ -39,15 +39,7 @@ def add_custom_scheme(
 
     .. note:: This feature is experimental.
     """
-    if _config is None:
-        _load_config()
-    if data is None:
-        data = {}
-    else:
-        data = data.copy()
-
-    data["scheme"] = scheme
-    _config[name] = data
+    pass
 
 
 def get_custom_scheme(name: str) -> Optional[Dict[str, str]]:

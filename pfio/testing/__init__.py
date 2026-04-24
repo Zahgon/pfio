@@ -26,26 +26,13 @@ class ZipForTest:
         self.destfile = destfile
 
     def content(self, path):
-        d = self.data
-
-        for node in path.split(os.path.sep):
-            d = d.get(node)
-            if not isinstance(d, dict):
-                return d
+        pass
 
     def _make_zip(self, destfile):
-        with ZipFile(destfile, "w") as z:
-            stack = []
-            self._write_zip_contents(z, stack, self.data)
+        pass
 
     def _write_zip_contents(self, z, stack, data):
-        for k in data:
-            if isinstance(data[k], dict):
-                self._write_zip_contents(z, stack+[k], data[k])
-            else:
-                path = os.path.join(*stack, k)
-                with z.open(path, 'w') as fp:
-                    fp.write(data[k])
+        pass
 
 
 def make_zip(zipfilename, root_dir, base_dir):
@@ -76,19 +63,7 @@ def randstring(length=16):
 
 def patch_subprocess(stdout, stderr=b''):
     def decorator(f):
-        def wrapper(*args, **kwargs):
-            orig_method = subprocess.run
-            try:
-                cp = subprocess.CompletedProcess(args='hoge', returncode=0)
-                cp.stdout = stdout
-                cp.stderr = stderr
-                subprocess.run = mock.create_autospec(subprocess.run,
-                                                      return_value=cp)
-                return f(*args, **kwargs)
-            finally:
-                subprocess.run = orig_method
-
-        return wrapper
+        pass
     return decorator
 
 
@@ -96,29 +71,10 @@ class OnMemoryHTTPServerForTest(http.server.BaseHTTPRequestHandler):
     files: Dict[str, str] = {}
 
     def do_GET(self):
-        content = OnMemoryHTTPServerForTest.files.get(self.path)
-
-        if content is None:
-            self.send_response_only(http.HTTPStatus.NOT_FOUND)
-            self.end_headers()
-        else:
-            self.send_response_only(http.HTTPStatus.OK)
-            self.send_header("Content-type", "application/octet-stream")
-            self.send_header("Content-Length", str(len(content)))
-            self.end_headers()
-            self.wfile.write(content)
+        pass
 
     def do_PUT(self):
-        length = self.headers.get("Content-Length", None)
-        if length is None:
-            self.send_response_only(http.HTTPStatus.NOT_IMPLEMENTED)
-            self.end_headers()
-            return
-
-        OnMemoryHTTPServerForTest.files[self.path] = \
-            self.rfile.read(int(length))
-        self.send_response_only(http.HTTPStatus.CREATED)
-        self.end_headers()
+        pass
 
 
 @contextmanager

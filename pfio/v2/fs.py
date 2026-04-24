@@ -94,11 +94,11 @@ class FS(abc.ABC):
 
     @property
     def cwd(self):
-        return self._cwd
+        pass
 
     @cwd.setter
     def cwd(self, value):
-        self._cwd = value
+        pass
 
     @abstractmethod
     def open(self, file_path: str, mode: str = 'rb',
@@ -125,18 +125,10 @@ class FS(abc.ABC):
         copied by overriding this method.
 
         '''
-        if rel_path.startswith("/"):
-            raise RuntimeError("Absolute path is not supported")
-        elif '..' in rel_path.split(os.path.sep):
-            raise RuntimeError("Only subtree is supported")
-
-        return self._newfs(os.path.join(self.cwd, rel_path))
+        pass
 
     def _newfs(self, path: str) -> 'FS':
-        fs = copy.copy(self)
-        fs._cwd = path
-        fs._reset()
-        return fs
+        pass
 
     def _checkfork(self):
         if not self.is_forked:
@@ -152,13 +144,11 @@ class FS(abc.ABC):
 
     @property
     def is_forked(self):
-        assert hasattr(self, 'pid')
-        return self.pid != os.getpid()
+        pass
 
     @property
     def is_traced(self):
-        assert hasattr(self, 'trace')
-        return self.trace
+        pass
 
     def close(self) -> None:
         pass
